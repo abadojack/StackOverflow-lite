@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html">
+  <title>Tony Stark</title>
+  <link rel="stylesheet" type="text/css" media="all" href="static/css/profile.css">
+  <script type="text/javascript" src="static/js/jquery-1.10.2.min.js"></script>
+</head>
+<body>
+  
+  <div id="w">
+    <div id="content" class="clearfix">
+      <div id="userphoto"><img src="static/images/avatar.png" alt="default avatar"></div>
+      <h1>Tony Stark</h1>
+
+      <nav id="profiletabs">
+        <ul class="clearfix">
+          <li><a href="#bio" class="sel">Bio</a></li>
+          <li><a href="#activity">Activity</a></li>
+        </ul>
+      </nav>
+      
+      <section id="bio">
+        <p><strong>Username:</strong> stark</p>
+        <p><strong>Name</strong>: Tony Stark</p>
+        <p><strong>Number of questions asked:</strong> 6</p>
+        <p><strong>Number of answers given</strong>: 9</p>
+      </section>
+      
+      <section id="activity" class="hidden">
+        <p>Most recent questions:</p>
+        
+        <p class="activity">Jarvis not executing jQuery</p>
+        
+        <p class="activity">How to connect Ultro to the Internet</p>
+        
+        <p class="activity">ed25519 keys in PEM format</p>
+        
+        <p class="activity">How to pass csv file in Golang</p>
+      </section>
+
+
+    </div><!-- end of content -->
+  </div><!-- end of w -->
+  <script type="text/javascript">
+$(function(){
+  $('#profiletabs ul li a').on('click', function(e){
+    e.preventDefault();
+    var newcontent = $(this).attr('href');
+    
+    $('#profiletabs ul li a').removeClass('sel');
+    $(this).addClass('sel');
+    
+    $('#content section').each(function(){
+      if(!$(this).hasClass('hidden')) { $(this).addClass('hidden'); }
+    });
+    
+    $(newcontent).removeClass('hidden');
+  });
+});
+</script>
+</body>
+</html>

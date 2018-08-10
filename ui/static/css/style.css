@@ -1,0 +1,499 @@
+body {
+    background-color: #ffffff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    line-height: 1.6em;
+    margin: 0;
+}
+
+/* Applies to all pages to contain them */
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    width: 95%;
+    margin: auto;
+}
+
+/* Grid for a full bar for the top column */
+
+.fullbar {
+    grid-column: span 3 / auto;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.header {
+    border-bottom: 1px solid black;
+    display: inline;
+    padding: 10px;
+}
+
+.header h3 {
+    display: inline;
+}
+
+/* the login and register buttons at the top navbar */
+
+.header input[type="submit"] {
+    border: none;
+    outline: none;
+    height: 30px;
+    width: 100px;
+    background: rgb(154, 205, 50);
+    color: #fff;
+    font-size: 18px;
+    border-radius: 20px;
+    display: inline;
+    float: right;
+}
+
+/* registration page form */
+
+.registerbox {
+    grid-column: span 2 / auto;
+    width: 50%;
+    height: 100%;
+    background: #000;
+    color: #fff;
+    box-sizing: border-box;
+    padding: 30px;
+    align-content: center;
+}
+
+#register {
+    margin: 0;
+    padding: 0 0 20px;
+    text-align: center;
+    font-size: 22px;
+}
+
+.registerbox p {
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+.registerbox input {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.registerbox select {
+    width: 100%;
+    height: 30px;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.registerbox input[type="text"], input[type="password"] {
+    border: none;
+    border-bottom: 1px solid #fff;
+    background: transparent;
+    outline: none;
+    height: 40px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.registerbox input[type="submit"] {
+    border: none;
+    outline: none;
+    height: 40px;
+    background: #fb2525;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 20px;
+}
+
+.registerbox input[type="submit"]:hover {
+    cursor: pointer;
+    background: #ffc107;
+    color: #000;
+}
+
+.registerbox a {
+    text-decoration: none;
+    font-size: 12px;
+    line-height: 20px;
+    color: darkgrey;
+}
+
+.registerbox a:hover {
+    color: #ffc107;
+}
+
+/* login page form */
+
+.loginbox {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    color: #fff;
+    box-sizing: border-box;
+    padding: 30px;
+}
+
+#login {
+    margin: 0;
+    padding: 0 0 20px;
+    text-align: center;
+    font-size: 22px;
+}
+
+.loginbox p {
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+.loginbox input {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.loginbox input[type="text"], input[type="password"] {
+    border: none;
+    border-bottom: 1px solid #fff;
+    background: transparent;
+    outline: none;
+    height: 40px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.loginbox input[type="submit"] {
+    border: none;
+    outline: none;
+    height: 40px;
+    background: #fb2525;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 20px;
+}
+
+.loginbox input[type="submit"]:hover {
+    cursor: pointer;
+    background: #ffc107;
+    color: #000;
+}
+
+.loginbox a {
+    text-decoration: none;
+    font-size: 12px;
+    line-height: 20px;
+    color: darkgrey;
+}
+
+.loginbox a:hover {
+    color: #ffc107;
+}
+
+/* navbar column */
+
+.nav {
+    list-style: none;
+    background: #20282D;
+    height: fit-content;
+    background-position: center right;
+    margin-bottom: 30px;
+    text-align: center;
+    border-bottom: 1px solid black;
+    border-top: 3px solid black;
+    border-left: 3px solid black;
+    border-right: 3px solid black;
+    border-radius: 5px;
+}
+
+/* nav bar ul list */
+
+.vertical-list {
+    list-style-type: none;
+}
+
+.vertical-list .button {
+    border-radius: 5px;
+    background: #515B62;
+}
+
+.vertical-list .button:hover {
+    background: #5F6B72;
+}
+
+.vertical-list li {
+    margin: 0 0 5px;
+}
+
+.vertical-list li:last-child {
+    margin: 0
+}
+
+/* Dark Button CSS  */
+
+.button {
+    outline: 0;
+    padding: 5px 12px;
+    width: 80%;
+    display: block;
+    color: #9fa8b0;
+    font-weight: bold;
+    text-shadow: 1px 1px #1f272b;
+    border: 1px solid #1c252b;
+    border-radius: 3px;
+}
+
+.button:hover {
+    color: #fff;
+}
+
+/* questions */
+
+.question {
+    width: 100%;
+    display: block;
+    color: #0088ff;
+    text-decoration: none;
+    text-align: left;
+}
+
+.question:hover {
+    color: rgb(245, 241, 8);
+}
+
+#question {
+    border-bottom: 1px solid black;
+}
+
+.active {
+    background-position: 0 top;
+    position: relative;
+    top: 1px;
+    color: #28b1de;
+    padding: 6px 12px 4px;
+}
+
+/* answers */
+
+.answers {
+    width: 100%;
+    display: block;
+    color: #0088ff;
+    text-decoration: none;
+    text-align: left;
+}
+
+.answer:hover {
+    color: rgb(245, 241, 8);
+}
+
+#answer {
+    border-bottom: 1px solid black;
+}
+
+/* main content section */
+
+.content {
+    grid-column: span 2 / auto;
+    background-size: cover;
+    height: fit-content;
+    background-position: center right;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* answers page text box */
+
+#textarea {
+    width: 100%;
+    height: 100px;
+    box-sizing: border-box;
+    padding: 5px;
+    column-count: auto;
+    font-size: 15px;
+}
+
+/* table */
+
+.submit {
+    display: inline-block;
+    font-size: 30px;
+    font-weight: bold;
+    padding: 1em 1.2em;
+    border: 0.16em solid rgba(255, 255, 255, 0);
+    box-sizing: border-box;
+    color: #28b1de;
+    text-align: center;
+}
+
+.submit:hover {
+    border-color: rgb(20, 245, 13);
+}
+
+/* moving the answers to the left */
+
+#solution {
+    text-align: left;
+}
+
+/* footer bar */
+
+.footer {
+    border-top: 1px solid black;
+    display: inline;
+    padding: 10px;
+    text-align: center;
+}
+
+/* question title class */
+
+.title input {
+    width: 40%;
+    margin-bottom: 20px;
+}
+
+.title input[type="text"] {
+    border: none;
+    border-bottom: 1px solid rgb(5, 5, 5);
+    background: transparent;
+    outline: none;
+    height: 40px;
+    font-size: 16px;
+}
+
+#search {
+    width: 100%;
+    height: 50px;
+    box-sizing: border-box;
+    padding: 5px;
+    column-count: auto;
+    font-size: 15px;
+}
+
+/* delete button */
+
+.delete {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 15px;
+    border: 0.16em solid rgba(255, 255, 255, 0);
+    border-radius: 2em;
+    box-sizing: border-box;
+    color: #f80606;
+    text-align: center;
+}
+
+.delete:hover {
+    border-color: rgb(20, 245, 13);
+}
+
+/* upvote button */
+
+.upvote {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 15px;
+    border: 0.16em solid rgba(255, 255, 255, 0);
+    border-radius: 2em;
+    box-sizing: border-box;
+    color: #066ff8;
+    text-align: center;
+}
+
+.upvote:hover {
+    border-color: rgb(13, 133, 245);
+}
+
+/* downvote button */
+
+.downvote {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 15px;
+    border: 0.16em solid rgba(255, 255, 255, 0);
+    border-radius: 2em;
+    box-sizing: border-box;
+    color: #f8ab06;
+    text-align: center;
+}
+
+.downvote:hover {
+    border-color: rgb(222, 245, 13);
+}
+
+/* accept button */
+
+.accept {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 15px;
+    border: 0.16em solid rgba(255, 255, 255, 0);
+    border-radius: 2em;
+    box-sizing: border-box;
+    color: #06f812;
+    text-align: center;
+}
+
+.accept:hover {
+    border-color: rgb(21, 245, 13);
+}
+
+/* drop down kwa recent questions */
+
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    align-content: left;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: left;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
