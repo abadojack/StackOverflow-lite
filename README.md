@@ -1,6 +1,6 @@
 # StackOverflow-lite
 
-[![Build Status](https://travis-ci.org/abadojack/StackOverflow-lite.svg?branch=master)](https://travis-ci.org/abadojack/StackOverflow-lite)
+[![Build Status](https://travis-ci.org/abadojack/StackOverflow-lite.svg?branch=master)](https://travis-ci.org/abadojack/StackOverflow-lite) [![Coverage Status](https://coveralls.io/repos/github/abadojack/StackOverflow-lite/badge.svg?branch=master)](https://coveralls.io/github/abadojack/StackOverflow-lite?branch=master)
 
 StackOverflow-lite is a platform where people can ask questions and provide answers
 
