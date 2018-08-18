@@ -7,6 +7,5 @@ install:
 
 script:
   - pytest
-
-after_success:
-  - coveralls
+  - coverage run -m pytest
+  - py.test --cov=project project/tests/
