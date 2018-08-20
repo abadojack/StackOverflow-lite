@@ -1,34 +1,31 @@
-# project/config file
-
 
 import os
-import psycopg2
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 
+
+# Base configuration
 class Config(object):
-    """Base config class"""
     DEBUG = False
     CSRF_ENABLED = True
 
 
+# Dev configuration
 class DevConfig(Config):
-    """Configuration for development"""
     DEBUG = True
 
 
+# Test configuration
 class TestConfig(Config):
-    """Test config"""
     TESTING = True
     DEBUG = True
 
-
+# Staging configuration
 class StagingConfig(Config):
-    """Staging configuration"""
     DEBUG = True
 
 
+# Production configuration
 class ProductionConfig(Config):
-    """Staging for production"""
     DEBUG = False
     TESTING = False
