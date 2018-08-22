@@ -1,7 +1,7 @@
 import unittest
 from project import app
 import json
-from project.models.models import questions
+from project.models.models import questions, Question, users, Answer, answers
 
 
 class TestRequests(unittest.TestCase):
@@ -11,17 +11,25 @@ class TestRequests(unittest.TestCase):
         self.app = app
         self.client = self.app.test_client
 
+        # Add answers
+        answers.extend((Answer(0, "Yeah, I'll do you one better. Who's Gamora ?", users[1]),
+                       Answer(1, "Yeah, I'll do you one better. Why's Gamora ?", users[2])))
+
+        # Add questions
+        questions.extend([Question(0, "Where", "Where is Gamora?", users[0], [answers[0]]),
+                          Question(1, "Who?", "Who is Gamora?", users[1], [answers[1]]),
+                          Question(2, "Why", "why is Gamora?", users[2])])
+
     def tearDown(self):
-        if len(questions) > 3:
-            questions.pop(3)
-        pass
+        questions.clear()
+        answers.clear()
 
     def test_get_questions(self):
         resp = self.client().get('/api/v1/questions')
         assert resp.status_code == 200
 
         resp_data = json.loads(resp.data)
-        assert len(resp_data) == 3
+        assert len(questions) == 3
         assert resp_data["0"]["poster"]["username"] == "starlord"
 
     def test_get_question_success(self):

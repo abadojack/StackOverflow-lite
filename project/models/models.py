@@ -62,9 +62,5 @@ users = [User(0, "starlord", "starlord@avengers.universe", "password"),
          User(1, "ironman", "stark@avengers.universe", "password"),
          User(2, "drax", "drax@avengers.universe", "password")]
 
-answers = [Answer(0, "Yeah, I'll do you one better. Who's Gamora ?", users[1]),
-           Answer(1, "Yeah, I'll do you one better. Why's Gamora ?", users[2])]
-
-questions = [Question(0, "Where", "Where is Gamora?", users[0], [answers[0]]),
-             Question(1, "Who?", "Who is Gamora?", users[1], [answers[1]]),
-             Question(2, "Why", "why is Gamora?", users[2])]
+questions = []
+answers = []
