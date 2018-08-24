@@ -4,8 +4,13 @@ python:
 
 install:
   - pip install -r requirements.txt
+  - pip install psycopg2-binary
 
 script:
-  - pytest
+  - psql -c 'create database stackoverflow;' -U postgres
+  - python migration.py
   - coverage run -m pytest
   - py.test --cov=project project/tests/
+
+after_success:
+  - coveralls
