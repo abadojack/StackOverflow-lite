@@ -4,7 +4,7 @@ import psycopg2
 base_dir = os.path.abspath(os.path.dirname(__file__))
 
 try:
-    conn = psycopg2.connect("dbname=stackoverflow host=localhost user=abadojack password=blerd1618")
+    conn = psycopg2.connect("dbname=stackoverflow host=localhost user=postgres password=''")
 except Exception as e:
     print("connect to database failed ", e)
 
