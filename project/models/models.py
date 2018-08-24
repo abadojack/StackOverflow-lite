@@ -55,7 +55,7 @@ def insert_token(token):
 
 def get_token(token):
     """get token from db"""
-    cur.execute('SELECT expired_tokens FROM tokens WHERE expired_tokens = "%s";' % token)
+    cur.execute("SELECT expired_tokens FROM tokens WHERE expired_tokens = '%s';" % token)
     token = cur.fetchone()
     return token
 
@@ -63,18 +63,15 @@ def get_token(token):
 def get_user_id():
     """ get uid from token"""
     token = request.headers.get('token', None)
-    uid = auth_decode(token)
-    if not uid:
-        return jsonify({}), 404
-    return uid
+    return auth_decode(token)
 
 
 @users.route('/auth/signup', methods=['POST'])
 def signup():
     """sign up a new user"""
-    username = json.loads(request.data)['username']
-    password = json.loads(request.data)['password']
-    email = json.loads(request.data)['email']
+    username = json.loads(request.data.decode())['username']
+    password = json.loads(request.data.decode())['password']
+    email = json.loads(request.data.decode())['email']
 
     try:
         if username == "":
@@ -108,8 +105,8 @@ def login():
     """
     login an existing user
     """
-    username = json.loads(request.data)['username']
-    password = json.loads(request.data)['password']
+    username = json.loads(request.data.decode())['username']
+    password = json.loads(request.data.decode())['password']
     user = User(username, "", "")
 
     try:
@@ -180,18 +177,6 @@ class User(object):
             self.time_created = user[4]
             return self
 
-    def unpack(self):
-        answer_dict = {}
-        for answer in self.answers:
-            answer_dict[answer.aid] = Answer.unpack(answer)
-
-        question_dict = {}
-        for question in self.questions:
-            question_dict[question.qid] = Question.unpack(question)
-
-        return {'uid': self.uid, 'username': self.username, 'email': self.email, 'time_created': self.time_created,
-                'questions': question_dict, 'answers': answer_dict}
-
 
 class Question(object):
     def __init__(self, title, body, uid):
@@ -204,20 +189,22 @@ class Question(object):
 
     def insert_question(self):
         """insert question to db"""
+        qid = uuid.uuid4()
         query = "INSERT INTO questions (id, title, body, uid, time_created, preferred_answer)" \
-                "VALUES (%s, %s, %s, %s, %s, %s)" % (self.qid, self.title, self.body, self.uid, self.time_created,
-                                                     self.preferred_answer)
+                "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (qid, self.title, self.body, self.uid,
+                                                                 self.time_created, self.preferred_answer)
         cur.execute(query)
         conn.commit()
 
-    def delete_question(self, qid):
+    @staticmethod
+    def delete_question(qid):
         """delete question from db"""
-        cur.execute("DELETE FROM questions WHERE qid=%s;" % qid)
+        cur.execute("DELETE FROM questions WHERE id='%s';" % qid)
 
     @staticmethod
     def get_all_questions():
         """get all questions in db"""
-        cur.execute = "SELECT * FROM questions;"
+        cur.execute("SELECT * FROM questions;")
         all_questions = cur.fetchall()
         questions_list = []
         for question in all_questions:
@@ -227,7 +214,8 @@ class Question(object):
             questions_list.append(question_dict)
         return questions_list
 
-    def get_user_questions(self, uid):
+    @staticmethod
+    def get_user_questions(uid):
         """get all questions by a user"""
         cur.execute("SELECT * FROM questions WHERE uid=%s;" % uid)
         all_questions = cur.fetchall()
@@ -239,31 +227,24 @@ class Question(object):
             questions_list.append(question_dict)
         return questions_list
 
-    def get_question(self, qid):
+    @staticmethod
+    def get_question(qid):
         """get specific question ffrom db"""
-        cur.execute("SELECT * FROM questions WHERE id=%s;" % qid)
+        cur.execute("SELECT * FROM questions WHERE id = '%s';" % qid)
         question = cur.fetchone()
-        question_dict = {'qid': question[0], 'title': question[1], 'body': question[2], 'uid': question[3],
-                         'time_created': question[4], 'preferred_answer': question[5]}
-        return question_dict
+        if question is not None:
+            quiz = Question(question[1], question[2], question[3])
+            quiz.qid = qid
+            quiz.time_created = question[4]
+            quiz.preferred_answer = question[5]
+            return quiz
+        return None
 
-    def update_question(self, qid, title, body, uid, time_created, preferred_answer):
+    def update_question(self):
         cur.execute("UPDATE questions SET title=%s, body=%s, uid=%s, time_created=%s, preferred_answer=%s"
                     "WHERE id=%s;",
-                    (title, body, uid, time_created, preferred_answer, qid))
+                    (self.title, self.body, self.uid, self.time_created, self.preferred_answer, self.qid))
         conn.commit()
-
-
-    def add_answer(self, answer):
-        self.answers.append(answer)
-
-    def unpack(self):
-        poster = User.unpack(self.poster)
-        answer_dict = {}
-        for answer in self.answers:
-            answer_dict[answer.aid] = Answer.unpack(answer)
-        return {'id': self.qid, 'title': self.title, 'body': self.body, 'time_created': self.time_created,
-                'poster': poster, 'answers': answer_dict}
 
 
 class Answer(object):
@@ -275,14 +256,12 @@ class Answer(object):
         self.preferred = False
         self.time_created = datetime.now()
 
-    def unpack(self):
-        return {'id': self.aid, 'body': self.body, 'uid': self.uid, 'qid': self.qid,
-                'preferred': self.preferred, 'time_created': self.time_created}
-
     def insert_answer(self):
         """insert answer to db"""
-        query = "INSERT INTO answers (body, uid, qid, preferred, time_created)" \
-                "VALUES (%s, %s, %s, %s, %s)" % (self.body, self.uid, self.qid, self.preferred, self.time_created)
+        aid = uuid.uuid4()
+        query = "INSERT INTO answers(id, body, uid, qid, preferred, time_created)" \
+                "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (aid, self.body, self.uid, self.qid, self.preferred,
+                                                                 self.time_created)
         cur.execute(query)
         conn.commit()
 
@@ -299,3 +278,26 @@ class Answer(object):
         """get answers by a particular user"""
         cur.execute("SELECT * FROM answers WHERE uid=%s" % uid)
         return cur.fetchall()
+
+    @staticmethod
+    def get_answer(aid):
+        """get answer using answer id"""
+        cur.execute("SELECT * FROM answers WHERE id = '%s';" % aid)
+        answer = cur.fetchone()
+        if answer is None:
+            return None
+        else:
+            body = answer[1]
+            uid = answer[2]
+            qid = answer[3]
+
+            ans = Answer(body, uid, qid)
+            ans.aid = aid
+            ans.time_created = answer[5]
+            ans.preferred = answer[4]
+
+            return ans
+
+    def update_answer(self, body, preferred):
+        cur.execute("UPDATE answers SET body='%s', preferred='%s' WHERE id='%s';" % (body, preferred, self.aid))
+        conn.commit()
