@@ -48,7 +48,7 @@ def auth_decode(token):
 
 def insert_token(token):
     """change the status of a request"""
-    query = "INSERT INTO tokens (expired_tokens) VALUES ('%s');" % token
+    query = "INSERT INTO tokens (id, expired_tokens) VALUES ('%s','%s');" % (uuid.uuid4(), token)
     cur.execute(query)
     conn.commit()
 
@@ -69,21 +69,21 @@ def get_user_id():
 @users.route('/auth/signup', methods=['POST'])
 def signup():
     """sign up a new user"""
-    username = json.loads(request.data.decode())['username']
-    password = json.loads(request.data.decode())['password']
-    email = json.loads(request.data.decode())['email']
-
     try:
+        username = json.loads(request.data.decode())['username']
+        password = json.loads(request.data.decode())['password']
+        email = json.loads(request.data.decode())['email']
+
         if username == "":
-            return jsonify({'response': 'username must not be empty'}), 409
+            return jsonify({'response': 'username must not be empty'}), 400
         if email == "":
-            return jsonify({'response': 'email must not be empty'}), 409
+            return jsonify({'response': 'email must not be empty'}), 400
         if not validate_email(email):
-            return jsonify({'response': 'email not valid'}), 409
+            return jsonify({'response': 'email not valid'}), 400
         if password == "":
-            return jsonify({'response': 'password must not be empty'}), 409
+            return jsonify({'response': 'password must not be empty'}), 400
         if len(password) < 6:
-            return jsonify({'response': 'password must be 6 characters or more'}), 409
+            return jsonify({'response': 'password must be 6 characters or more'}), 400
 
         """
         search if the user exists in the database
@@ -97,7 +97,7 @@ def signup():
 
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as e:
         print('error', e)
-        return jsonify({'response': 'something went wrong'}), 400
+        return jsonify({'response': 'something went wrong'}), 500
 
 
 @users.route('/auth/login', methods=['POST'])
@@ -118,23 +118,24 @@ def login():
                 response = {'response': 'login successful', 'token': token.decode()}
                 return jsonify(response), 200
         else:
-            return jsonify({'response': 'enter correct user details'}), 409
+            return jsonify({'response': 'invalid username/password'}), 400
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as e:
         print('error in login', e)
-        return jsonify({'response': 'user not found'}), 409
+        return jsonify({'response': 'user not found'}), 404
 
 
-@users.route('/signout', methods=['GET'])
+@users.route('/auth/signout', methods=['GET'])
 def signout():
     """sign out user """
     try:
         token = request.headers.get('token')
-        insert_token(token) # insert token to expired db
-        return jsonify({'response': 'signed out'})
+        # insert token to expired db
+        insert_token(token)
+        return jsonify({'response': 'signed out'}), 200
 
     except Exception as ex:
         print('error', ex)
-        return jsonify({'error': 'sign out error'}), 409
+        return jsonify({'error': 'something went wrong'}), 500
 
 
 class User(object):
@@ -151,7 +152,8 @@ class User(object):
         uid = uuid.uuid4()
         query = "INSERT INTO " \
                 "users (id, username,email,password_hash,time_created)" \
-                "VALUES('%s','%s', '%s', '%s', '%s')" % (uid, self.username, self.email, password_hash, self.time_created)
+                "VALUES('%s','%s', '%s', '%s', '%s')" % (
+                uid, self.username, self.email, password_hash, self.time_created)
         cur.execute(query)
         conn.commit()
 
@@ -160,7 +162,7 @@ class User(object):
         cur.execute("SELECT * FROM users WHERE id = %s;" % uid)
         user = cur.fetchone()
         user_dict = {'id': user[0], 'username': user[1], 'email': user[2], 'password_hash': user[3],
-                         'time_created': user[4]}
+                     'time_created': user[4]}
         print(user_dict, "userdict")
         return user_dict
 
@@ -199,7 +201,11 @@ class Question(object):
     @staticmethod
     def delete_question(qid):
         """delete question from db"""
-        cur.execute("DELETE FROM questions WHERE id='%s';" % qid)
+        if Question.get_question(qid) is not None:
+            cur.execute("DELETE FROM questions WHERE id='%s';" % qid)
+            return True
+        else:
+            return False
 
     @staticmethod
     def get_all_questions():
@@ -209,7 +215,7 @@ class Question(object):
         questions_list = []
         for question in all_questions:
             # questions_list.append(question.__dict__)
-            question_dict = {'qid': question[0], 'title': question[1], 'body': question[2],'uid': question[3],
+            question_dict = {'qid': question[0], 'title': question[1], 'body': question[2], 'uid': question[3],
                              'time_created': question[4], 'preferred_answer': question[5]}
             questions_list.append(question_dict)
         return questions_list
@@ -266,8 +272,8 @@ class Answer(object):
         conn.commit()
 
     def delete_answer(self, aid):
-            """delete answer from db"""
-            cur.execute("DELETE FROM answers WHERE id=%s;" % aid)
+        """delete answer from db"""
+        cur.execute("DELETE FROM answers WHERE id=%s;" % aid)
 
     def get_question_answers(self, qid):
         """get answers for a particular question"""
