@@ -201,7 +201,11 @@ class Question(object):
     @staticmethod
     def delete_question(qid):
         """delete question from db"""
-        cur.execute("DELETE FROM questions WHERE id='%s';" % qid)
+        if Question.get_question(qid) is not None:
+            cur.execute("DELETE FROM questions WHERE id='%s';" % qid)
+            return True
+        else:
+            return False
 
     @staticmethod
     def get_all_questions():

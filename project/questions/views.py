@@ -207,8 +207,10 @@ def update_answer(question_id, answer_id):
 def delete_question(question_id):
     try:
         if token_is_expired() is None:
-            Question.delete_question(question_id)
-            return jsonify({"response": "request successfull"}), 200
+            if Question.delete_question(question_id):
+                return jsonify({"response": "request successfull"}), 200
+            else:
+                return jsonify({"response": "question does not exist"}), 404
         else:
             return jsonify({'response': 'Invalid token, login again'}), 401
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:

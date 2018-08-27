@@ -19,18 +19,11 @@ class TestQuestions(unittest.TestCase):
             dict(email='test@gmail.com', username='test', password='password')),
                            content_type='application/json')
 
-        # login
-        res_login = self.client().post('api/v1/auth/login', data=json.dumps(
-            dict(username='test', password='password')),
-                                       content_type='application/json')
-        resp_data = json.loads(res_login.data.decode())
-        token = resp_data['token']
-
         # add question
         self.client().post('api/v1/questions', data=json.dumps(
             dict(title='test title', body='some body of quiz')),
                            content_type='application/json',
-                           headers=dict(token=token))
+                           headers=dict(token=self.login()))
 
     def tearDown(self):
         delete_tables()
@@ -91,6 +84,13 @@ class TestQuestions(unittest.TestCase):
         assert resp.status_code == 401
         resp_data = json.loads(resp.data.decode())
         self.assertEqual(resp_data['error'], 'could not generate user id from token')
+
+    # TODO: finish test questions
+    def test_delete_question(self):
+        self.client().post('api/v1/questions', data=json.dumps(
+            dict(title='test title', body='some body of quiz')),
+                           content_type='application/json',
+                           headers=dict(token=self.login()))
 
 
 if __name__ == '__main__':
