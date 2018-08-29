@@ -14,9 +14,9 @@ class TestQuestions(BaseTest):
 
     def test_get_question_success(self):
         res = self.client().get('/api/v1/questions', headers=dict(token=self.login()))
-        qid = json.loads(res.data.decode())['questions'][0]['qid']
+        question_id = json.loads(res.data.decode())['questions'][0]['question_id']
 
-        resp = self.client().get('/api/v1/questions/%s' % qid, headers=dict(token=self.login()))
+        resp = self.client().get('/api/v1/questions/%s' % question_id, headers=dict(token=self.login()))
         assert resp.status_code == 200
         resp_data = json.loads(resp.data)
         self.assertTrue(resp_data["question"])
@@ -33,9 +33,9 @@ class TestQuestions(BaseTest):
 
     def test_add_answer(self):
         res = self.client().get('/api/v1/questions', headers=dict(token=self.login()))
-        qid = json.loads(res.data.decode())['questions'][0]['qid']
+        question_id = json.loads(res.data.decode())['questions'][0]['question_id']
 
-        resp = self.client().post('/api/v1/questions/' + qid + '/answers', data=json.dumps(
+        resp = self.client().post('/api/v1/questions/' + question_id + '/answers', data=json.dumps(
             dict(title='test title', body='some body of quiz')),
                                   content_type='application/json',
                                   headers=dict(token=self.login()))
@@ -46,9 +46,9 @@ class TestQuestions(BaseTest):
 
     def test_add_answer_user_not_found(self):
         res = self.client().get('/api/v1/questions')
-        qid = json.loads(res.data.decode())['questions'][0]['qid']
+        question_id = json.loads(res.data.decode())['questions'][0]['question_id']
 
-        resp = self.client().post('/api/v1/questions/' + qid + '/answers', data=json.dumps(
+        resp = self.client().post('/api/v1/questions/' + question_id + '/answers', data=json.dumps(
             dict(title='test title', body='some body of quiz')),
                                   content_type='application/json',
                                   headers=dict(token=''))
@@ -73,9 +73,9 @@ class TestQuestions(BaseTest):
                                 headers=dict(token=self.login()))
         resp_data = json.loads(res.data.decode())
 
-        qid = resp_data['questions'][1]['qid']
+        question_id = resp_data['questions'][1]['question_id']
 
-        resp = self.client().delete('api/v1/questions/' + qid, content_type='application/json',
+        resp = self.client().delete('api/v1/questions/' + question_id, content_type='application/json',
                                     headers=dict(token=self.login()))
         assert resp.status_code == 200
         resp_data = json.loads(resp.data.decode())

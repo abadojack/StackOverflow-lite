@@ -14,5 +14,3 @@ app_settings = os.getenv(
     'project.config.DevConfig'
 )
 app.config.from_object(app_settings)
-
-print(app.config.get("DATABASE_HOST"))

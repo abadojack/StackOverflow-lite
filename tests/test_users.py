@@ -81,7 +81,7 @@ class TestUsers(BaseTest):
 
         token = json.loads(res_login.data.decode())["token"]
 
-        res = self.client().get('api/v1/auth/signout', content_type='application/json', headers=dict(token=token))
+        res = self.client().post('api/v1/auth/signout', content_type='application/json', headers=dict(token=token))
 
         resp_data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 200)
