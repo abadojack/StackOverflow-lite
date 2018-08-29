@@ -1,5 +1,11 @@
+import json
 
-from . import stackoverflow
+import psycopg2
+
+from flask import request, jsonify
+
+from project.users.views import get_token, get_user_id
+from . import questions
 from project.models.models import *
 
 
@@ -11,7 +17,7 @@ def token_is_expired():
         return token_found
 
 
-@stackoverflow.route('/questions', methods=['GET'])
+@questions.route('/questions', methods=['GET'])
 def get_questions():
     """
     get:
@@ -46,13 +52,13 @@ def get_questions():
             else:
                 return jsonify({'response': 'It\'s empty here'}), 204
         else:
-            return jsonify({'error': 'Invalid token, login again'}), 401
+            return jsonify({'response': 'Invalid token, login again'}), 401
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:
-        print('error', ex)
-        return jsonify({'error': 'something went wrong'}), 500
+        print('response', ex)
+        return jsonify({'response': 'something went wrong'}), 500
 
 
-@stackoverflow.route('/questions/<string:question_id>', methods=['GET'])
+@questions.route('/questions/<string:question_id>', methods=['GET'])
 def get_question(question_id):
     try:
         if token_is_expired() is None:
@@ -64,11 +70,11 @@ def get_question(question_id):
         else:
             return jsonify({'response': 'Invalid token, login again'}), 401
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:
-        print('error', ex)
-        return jsonify({'error': 'could not get requests'}), 500
+        print('response', ex)
+        return jsonify({'response': 'could not get requests'}), 500
 
 
-@stackoverflow.route('/questions', methods=['POST'])
+@questions.route('/questions', methods=['POST'])
 def add_question():
     """
         post:
@@ -97,16 +103,18 @@ def add_question():
             uid = get_user_id()
             if uid:
                 question = Question(title, body, uid)
-                question.insert_question()
-                return jsonify({'response': 'question posted successfully'}), 201
+                if question.insert_question():
+                    return jsonify({'response': 'question posted successfully'}), 201
+                else:
+                    return jsonify({'response': 'question with same title already exists'}), 409
             else:
-                return jsonify({'error': 'could not generate user id from token'}), 401
+                return jsonify({'response': 'could not generate user id from token'}), 401
         except (psycopg2.DatabaseError, psycopg2.IntegrityError, KeyError, Exception) as ex:
-            print('error', ex)
+            print('response', ex)
             return jsonify({'response': 'something went wrong'}), 500
 
 
-@stackoverflow.route('/questions/<string:question_id>/answers', methods=['POST'])
+@questions.route('/questions/<string:question_id>/answers', methods=['POST'])
 def add_answer(question_id):
     """
             post:
@@ -143,13 +151,13 @@ def add_answer(question_id):
                 answer.insert_answer()
                 return jsonify({'response': 'answer posted successfully'}), 201
             else:
-                return jsonify({'error': 'could not generate user id from token'}), 401
+                return jsonify({'response': 'could not generate user id from token'}), 401
         except (psycopg2.DatabaseError, psycopg2.IntegrityError, KeyError, Exception) as ex:
-            print('error', ex)
+            print('response', ex)
             return jsonify({'response': 'something went wrong'}), 500
 
 
-@stackoverflow.route('/questions/<question_id>/answers/<answer_id>', methods=['PUT'])
+@questions.route('/questions/<question_id>/answers/<answer_id>', methods=['PUT'])
 def update_answer(question_id, answer_id):
     """
                 put:
@@ -197,22 +205,22 @@ def update_answer(question_id, answer_id):
                 answer.update_answer(body, answer.preferred)
                 return jsonify({'response': 'answer updated successfully'}), 200
         else:
-            return jsonify({'error': 'could not generate user id from token'}), 401
+            return jsonify({'response': 'could not generate user id from token'}), 401
     except Exception as ex:
         print(ex)
         return jsonify({"response": "Something went wrong"}), 500
 
 
-@stackoverflow.route('/questions/<question_id>', methods=['DELETE'])
+@questions.route('/questions/<question_id>', methods=['DELETE'])
 def delete_question(question_id):
     try:
         if token_is_expired() is None:
             if Question.delete_question(question_id):
-                return jsonify({"response": "request successfull"}), 200
+                return jsonify({"response": "question deleted successfully"}), 200
             else:
                 return jsonify({"response": "question does not exist"}), 404
         else:
             return jsonify({'response': 'Invalid token, login again'}), 401
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:
-        print('error', ex)
-        return jsonify({'error': 'something went wrong'}), 500
+        print('response', ex)
+        return jsonify({'response': 'something went wrong'}), 500

@@ -1,20 +1,8 @@
 import json
-import unittest
-
-from project import app
-from project.config import create_tables, delete_tables
+from . import BaseTest
 
 
-class TestUsers(unittest.TestCase):
-    def setUp(self):
-        app.testing = True
-        self.app = app
-        self.client = self.app.test_client
-        create_tables()
-
-    def tearDown(self):
-        delete_tables()
-
+class TestUsers(BaseTest):
     def test_sign_up_success(self):
         res = self.client().post('api/v1/auth/signup', data=json.dumps(
             dict(email='test@gmail.com', username='test', password='password')),
@@ -46,7 +34,7 @@ class TestUsers(unittest.TestCase):
                                  content_type='application/json')
         resp_data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 500)
-        self.assertEqual(resp_data['response'], 'something went wrong')
+        self.assertEqual(resp_data['response'], 'json body must contain username, password and email')
 
     def test_sign_up_empty_username(self):
         res = self.client().post('api/v1/auth/signup', data=json.dumps(
