@@ -24,13 +24,13 @@ except Exception as e:
     cur.execute("ROLLBACK")
 
 
-def auth_encode(uid):
+def auth_encode(user_id):
     """Generate auth token"""
     try:
         payload = {
             'exp': datetime.now() + timedelta(hours=1),
             'iat': datetime.now(),
-            'sub': uid
+            'sub': user_id
         }
         return jwt.encode(
             payload,
@@ -65,7 +65,7 @@ def get_token(token):
 
 
 def get_user_id():
-    """ get uid from token"""
+    """ get user_id from token"""
     token = request.headers.get('token', None)
     return auth_decode(token)
 
@@ -119,7 +119,7 @@ def login():
         user = user.exists()
         if check_password_hash(user.password_hash, password):
             """token if password is correct"""
-            token = auth_encode(user.uid)
+            token = auth_encode(user.user_id)
             if token:
                 response = {'response': 'login successful', 'token': token.decode()}
                 return jsonify(response), 200
@@ -133,15 +133,17 @@ def login():
         return jsonify({'response': 'user not found'}), 404
 
 
-@users.route('/auth/signout', methods=['GET'])
+@users.route('/auth/signout', methods=['POST'])
 def signout():
     """sign out user """
     try:
         token = request.headers.get('token')
         # insert token to expired db
-        insert_token(token)
-        return jsonify({'response': 'signed out'}), 200
-
+        if get_token(token) is None:
+            insert_token(token)
+            return jsonify({'response': 'signed out'}), 200
+        else:
+            return jsonify({'response': 'Invalid token'}), 401
     except Exception as ex:
         print('response', ex)
         return jsonify({'response': 'something went wrong'}), 500
