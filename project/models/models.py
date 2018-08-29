@@ -1,9 +1,13 @@
+import json
 import uuid
-from datetime import datetime
-
-from werkzeug.security import generate_password_hash
-
-from project.database import conn
+import psycopg2
+from datetime import datetime, timedelta
+import jwt
+from flask import jsonify, request
+from validate_email import validate_email
+from werkzeug.security import check_password_hash, generate_password_hash
+from project.config import Config, conn
+from . import users
 
 try:
     cur = conn.cursor()
@@ -14,6 +18,124 @@ except Exception as e:
     print('connection exception ', e)
     cur = conn.cursor()
     cur.execute("ROLLBACK")
+
+
+def auth_encode(uid):
+    """Generate auth token"""
+    try:
+        payload = {
+            'exp': datetime.now() + timedelta(hours=1),
+            'iat': datetime.now(),
+            'sub': uid
+        }
+        return jwt.encode(
+            payload,
+            Config.SECRET
+        )
+    except Exception as ex:
+        raise ex
+
+
+def auth_decode(token):
+    """Decode auth token"""
+    try:
+        payload = jwt.decode(token, Config.SECRET)
+        return payload['sub']
+    except Exception as e:
+        print('auth_token error', e)
+        return None
+
+
+def insert_token(token):
+    """change the status of a request"""
+    query = "INSERT INTO tokens (id, expired_tokens) VALUES ('%s','%s');" % (uuid.uuid4(), token)
+    cur.execute(query)
+    conn.commit()
+
+
+def get_token(token):
+    """get token from db"""
+    cur.execute("SELECT expired_tokens FROM tokens WHERE expired_tokens = '%s';" % token)
+    token = cur.fetchone()
+    return token
+
+
+def get_user_id():
+    """ get uid from token"""
+    token = request.headers.get('token', None)
+    return auth_decode(token)
+
+
+@users.route('/auth/signup', methods=['POST'])
+def signup():
+    """sign up a new user"""
+    try:
+        username = json.loads(request.data.decode())['username']
+        password = json.loads(request.data.decode())['password']
+        email = json.loads(request.data.decode())['email']
+
+        if username == "":
+            return jsonify({'response': 'username must not be empty'}), 400
+        if email == "":
+            return jsonify({'response': 'email must not be empty'}), 400
+        if not validate_email(email):
+            return jsonify({'response': 'email not valid'}), 400
+        if password == "":
+            return jsonify({'response': 'password must not be empty'}), 400
+        if len(password) < 6:
+            return jsonify({'response': 'password must be 6 characters or more'}), 400
+
+        """
+        search if the user exists in the database
+        """
+        user = User(username, email, "")
+        if user.exists() is None:
+            user.create_user(password)
+            return jsonify({'response': 'user created successfully'}), 201
+        else:
+            return jsonify({'response': 'user already exists'}), 409
+
+    except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as e:
+        print('error', e)
+        return jsonify({'response': 'something went wrong'}), 500
+
+
+@users.route('/auth/login', methods=['POST'])
+def login():
+    """
+    login an existing user
+    """
+    username = json.loads(request.data.decode())['username']
+    password = json.loads(request.data.decode())['password']
+    user = User(username, "", "")
+
+    try:
+        user = user.exists()
+        if check_password_hash(user.password_hash, password):
+            """token if password is correct"""
+            token = auth_encode(user.uid)
+            if token:
+                response = {'response': 'login successful', 'token': token.decode()}
+                return jsonify(response), 200
+        else:
+            return jsonify({'response': 'invalid username/password'}), 400
+    except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as e:
+        print('error in login', e)
+        return jsonify({'response': 'user not found'}), 404
+
+
+@users.route('/auth/signout', methods=['GET'])
+def signout():
+    """sign out user """
+    try:
+        token = request.headers.get('token')
+        # insert token to expired db
+        insert_token(token)
+        return jsonify({'response': 'signed out'}), 200
+
+    except Exception as ex:
+        print('error', ex)
+        return jsonify({'error': 'something went wrong'}), 500
 
 
 class User(object):
@@ -69,18 +191,12 @@ class Question(object):
 
     def insert_question(self):
         """insert question to db"""
-        self.qid = uuid.uuid4()
-
-        # question titles should not be the same
-        if self.get_question_title(self.title) is None:
-            query = "INSERT INTO questions (id, title, body, uid, time_created, preferred_answer)" \
-                    "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (self.qid, self.title, self.body, self.uid,
-                                                                     self.time_created, self.preferred_answer)
-            cur.execute(query)
-            conn.commit()
-            return True
-        else:
-            return False
+        qid = uuid.uuid4()
+        query = "INSERT INTO questions (id, title, body, uid, time_created, preferred_answer)" \
+                "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (qid, self.title, self.body, self.uid,
+                                                                 self.time_created, self.preferred_answer)
+        cur.execute(query)
+        conn.commit()
 
     @staticmethod
     def delete_question(qid):
@@ -111,6 +227,7 @@ class Question(object):
         all_questions = cur.fetchall()
         questions_list = []
         for question in all_questions:
+            # questions_list.append(question.__dict__)
             question_dict = {'qid': question[0], 'title': question[1], 'body': question[2], 'uid': question[3],
                              'time_created': question[4], 'preferred_answer': question[5]}
             questions_list.append(question_dict)
@@ -118,25 +235,12 @@ class Question(object):
 
     @staticmethod
     def get_question(qid):
-        """get specific question from db using id"""
+        """get specific question ffrom db"""
         cur.execute("SELECT * FROM questions WHERE id = '%s';" % qid)
         question = cur.fetchone()
         if question is not None:
             quiz = Question(question[1], question[2], question[3])
             quiz.qid = qid
-            quiz.time_created = question[4]
-            quiz.preferred_answer = question[5]
-            return quiz
-        return None
-
-    @staticmethod
-    def get_question_title(title):
-        """get specific question from db using title"""
-        cur.execute("SELECT * FROM questions WHERE title = '%s';" % title)
-        question = cur.fetchone()
-        if question is not None:
-            quiz = Question(question[1], question[2], question[3])
-            quiz.qid = question[0]
             quiz.time_created = question[4]
             quiz.preferred_answer = question[5]
             return quiz
