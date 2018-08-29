@@ -2,4 +2,4 @@ from flask import Blueprint
 
 
 # configure blueprint
-questions = Blueprint('questions', __name__)
+users = Blueprint('users', __name__)
