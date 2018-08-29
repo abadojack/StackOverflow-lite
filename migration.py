@@ -1,4 +1,4 @@
-from project.database import create_tables
+from project.config import create_tables
 
 
 def migration():

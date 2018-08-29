@@ -2,4 +2,4 @@ from flask import Blueprint
 
 
 # configure blueprint
-questions = Blueprint('questions', __name__)
+stackoverflow = Blueprint('stackoverflow', __name__)

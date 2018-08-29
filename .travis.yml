@@ -10,7 +10,7 @@ script:
   - psql -c 'create database stackoverflow;' -U postgres
   - python migration.py
   - coverage run -m pytest
-  - py.test --cov=project
+  - py.test --cov=project project/tests/
 
 after_success:
   - coveralls
