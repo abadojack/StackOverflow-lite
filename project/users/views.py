@@ -74,9 +74,9 @@ def get_user_id():
 def signup():
     """sign up a new user"""
     try:
-        username = json.loads(request.data.decode())['username']
-        password = json.loads(request.data.decode())['password']
-        email = json.loads(request.data.decode())['email']
+        username = json.loads(request.data.decode())['username'].replace(" ", "")
+        password = json.loads(request.data.decode())['password'].replace(" ", "")
+        email = json.loads(request.data.decode())['email'].replace(" ", "")
 
         if username == "":
             return jsonify({'response': 'username must not be empty'}), 400
@@ -112,8 +112,8 @@ def login():
     login an existing user
     """
     try:
-        username = json.loads(request.data.decode())['username']
-        password = json.loads(request.data.decode())['password']
+        username = json.loads(request.data.decode())['username'].replace(" ", "")
+        password = json.loads(request.data.decode())['password'].replace(" ", "")
         user = User(username, "", "")
 
         user = user.exists()

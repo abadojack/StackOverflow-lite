@@ -2,11 +2,15 @@ import psycopg2
 from .config import Config
 
 try:
-    conn = psycopg2.connect("dbname=%s host=%s user=%s password=%s" % (Config.DATABASE_NAME,
-                                                                      Config.DATABASE_HOST,
-                                                                      Config.DATABASE_USER,
-                                                                      Config.DATABASE_PASSWORD))
+    #conn = psycopg2.connect("dbname=%s host=%s user=%s password=%s" % (Config.DATABASE_NAME,
+    #                                                                  Config.DATABASE_HOST,
+    #                                                                  Config.DATABASE_USER,
+    #                                                                  Config.DATABASE_PASSWORD))
     # conn = psycopg2.connect("dbname=dtf1o3dihcmjh host=ec2-50-17-194-129.compute-1.amazonaws.com user=sclbsmrebwfsnt password=010cef844685c852fc51be3afe0e72d3220154a228f00bf1ec6a27cd03caa3a4")
+    # conn = psycopg2.connect("dbname=stackoverflow1 host=localhost user=abadojack password=''")
+    conn = psycopg2.connect("dbname=stackoverflow1 host=localhost user=postgres password=''")
+    # conn = psycopg2.connect("dbname=dc8m25uqlnpb2n host=ec2-50-16-196-57.compute-1.amazonaws.com user=tyhuqknsihddcw password=63a38bce0f36449d6b23fc3a142570066bdbfb961b819805dd93132307fbbfdd")
+except Exception as e:
 except Exception as e:
     print("connect to database failed ", e)
 

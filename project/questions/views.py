@@ -12,9 +12,25 @@ from project.models.models import *
 def token_is_expired():
     """check if token is valid"""
     token = request.headers.get('token', None)
-    token_found = get_token(token)
-    if token_found:
-        return token_found
+
+    # try getting user_id from token
+    if get_user_id() is None:
+        return 'Invalid token'
+    else:
+        # check if token is expired
+        token_found = get_token(token)
+        if token_found:
+            return token_found
+
+
+@questions.app_errorhandler(404)
+def not_found(error):
+    return jsonify({'response': 'Not found'}), 404
+
+
+@questions.app_errorhandler(405)
+def not_found(error):
+    return jsonify({'response': 'Method not found'}), 405
 
 
 @questions.route('/questions', methods=['GET'])
@@ -47,8 +63,6 @@ def get_questions():
     try:
         if token_is_expired() is None:
             questions = Question.get_all_questions()
-            for question in questions:
-                print(question["question_id"])
             if questions:
                 return jsonify({'questions': questions}), 200
             else:
