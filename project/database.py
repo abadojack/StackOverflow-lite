@@ -11,7 +11,6 @@ try:
     conn = psycopg2.connect("dbname=stackoverflow1 host=localhost user=postgres password=''")
     # conn = psycopg2.connect("dbname=dc8m25uqlnpb2n host=ec2-50-16-196-57.compute-1.amazonaws.com user=tyhuqknsihddcw password=63a38bce0f36449d6b23fc3a142570066bdbfb961b819805dd93132307fbbfdd")
 except Exception as e:
-except Exception as e:
     print("connect to database failed ", e)
 
 
