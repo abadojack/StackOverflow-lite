@@ -1,4 +1,5 @@
 import json
+import re
 
 import psycopg2
 
@@ -116,6 +117,10 @@ def add_question():
             title = json.loads(request.data)['title']
             body = json.loads(request.data)['body']
 
+            if re.match('.*[a-zA-Z0-9]+.*', title) is None:
+                return jsonify({'response': 'invalid title'}), 400
+            if re.match('.*[a-zA-Z0-9]+.*', body) is None:
+                return jsonify({'response': 'invalid body'}), 400
             user_id = get_user_id()
             if user_id:
                 question = Question(title, body, user_id)
@@ -161,6 +166,9 @@ def add_answer(question_id):
     if token_is_expired() is None:
         try:
             body = json.loads(request.data)['body']
+
+            if re.match('.*[a-zA-Z0-9]+.*', body) is None:
+                return jsonify({'response': 'invalid body'}), 400
 
             user_id = get_user_id()
             if user_id:

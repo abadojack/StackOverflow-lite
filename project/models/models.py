@@ -46,7 +46,7 @@ class User(object):
 
     def exists(self):
         """check if user exists using"""
-        cur.execute("SELECT * FROM users WHERE username = '%s';" % self.username)
+        cur.execute("SELECT * FROM users WHERE username = '%s' OR email='%s';" % (self.username, self.email))
         user = cur.fetchone()
         if user is None:
             return None

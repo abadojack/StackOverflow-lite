@@ -1,5 +1,4 @@
 import json
-import unittest
 
 from . import BaseTest
 
@@ -31,7 +30,19 @@ class TestQuestions(BaseTest):
         resp = self.client().get('/api/v1/questions/30', headers=dict(token=self.login()))
         assert resp.status_code == 404
 
-    def test_add_question_user_not_found(self):
+    def test_add_question_empty_title(self):
+        resp = self.client().post('/api/v1/questions',
+                                  headers=dict(token=self.login()),
+                                  data=json.dumps({'body': 'Is this the real life?', 'title': ''}))
+        assert resp.status_code == 400
+
+    def test_add_question_empty_body(self):
+        resp = self.client().post('/api/v1/questions',
+                                  headers=dict(token=self.login()),
+                                  data=json.dumps({'body': '', 'title': 'life'}))
+        assert resp.status_code == 400
+
+    def test_add_question_user_empty_token(self):
         resp = self.client().post('/api/v1/questions',
                                   headers=dict(token=''),
                                   data=json.dumps({'body': 'Is this the real life?', 'title': 'question'}))
@@ -88,5 +99,3 @@ class TestQuestions(BaseTest):
         self.assertEqual(resp_data['response'], 'question deleted successfully')
 
 
-if __name__ == '__main__':
-    unittest.main()

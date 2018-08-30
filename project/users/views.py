@@ -1,4 +1,6 @@
 import json
+import re
+
 import uuid
 from datetime import datetime, timedelta
 
@@ -74,20 +76,16 @@ def get_user_id():
 def signup():
     """sign up a new user"""
     try:
-        username = json.loads(request.data.decode())['username'].replace(" ", "")
+        username = json.loads(request.data.decode())['username']
         password = json.loads(request.data.decode())['password'].replace(" ", "")
         email = json.loads(request.data.decode())['email'].replace(" ", "")
 
-        if username == "":
-            return jsonify({'response': 'username must not be empty'}), 400
-        if email == "":
-            return jsonify({'response': 'email must not be empty'}), 400
+        if re.match('^[a-zA-Z][-\w.]{0,22}([a-zA-Z\d]|(?<![-.])_)$', username) is None:
+            return jsonify({'response': 'invalid username'}), 400
         if not validate_email(email):
-            return jsonify({'response': 'email not valid'}), 400
-        if password == "":
-            return jsonify({'response': 'password must not be empty'}), 400
-        if len(password) < 6:
-            return jsonify({'response': 'password must be 6 characters or more'}), 400
+            return jsonify({'response': 'invalid email'}), 400
+        if re.match('[A-Za-z0-9@#$%^&+=]{8,}', password) is None:
+            return jsonify({'response': 'password must contain 6 or more characters'}), 400
 
         """
         search if the user exists in the database
@@ -98,9 +96,9 @@ def signup():
             return jsonify({'response': 'user created successfully'}), 201
         else:
             return jsonify({'response': 'user already exists'}), 409
-    except KeyError as ex:
+    except (KeyError, ValueError) as ex:
         print('response', ex)
-        return jsonify({'response': 'json body must contain username, password and email'}), 500
+        return jsonify({'response': 'json body must contain username, password and email'}), 400
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:
         print('error in signup', ex)
         return jsonify({'response': 'something went wrong'}), 500
@@ -124,10 +122,10 @@ def login():
                 response = {'response': 'login successful', 'token': token.decode()}
                 return jsonify(response), 200
         else:
-            return jsonify({'response': 'invalid username/password'}), 400
-    except KeyError as ex:
+            return jsonify({'response': 'invalid username/password'}), 422
+    except (KeyError, ValueError) as ex:
         print('error in login', ex)
-        return jsonify({'response': 'json body must contain username and password'}), 500
+        return jsonify({'response': 'json body must contain username and password'}), 400
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:
         print('error in login', ex)
         return jsonify({'response': 'user not found'}), 404
