@@ -166,10 +166,10 @@ class Answer(object):
         """insert answer to db"""
         question = Question.get_question(self.question_id)
         if question:
-            answer_id = uuid.uuid4()
-            if self.get_answer_from_body(self.body) is None:
+            self.answer_id = uuid.uuid4()
+            if self.get_answer_from_body(self.body, self.question_id) is None:
                 query = "INSERT INTO answers(id, body, user_id, question_id, preferred, time_created)" \
-                        "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (answer_id, self.body, self.user_id, self.question_id, self.preferred,
+                        "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (self.answer_id, self.body, self.user_id, self.question_id, self.preferred,
                                                                          self.time_created)
                 cur.execute(query)
                 conn.commit()
@@ -179,9 +179,10 @@ class Answer(object):
         else:
             return 'question not found'
 
-    def delete_answer(self, answer_id):
+    @staticmethod
+    def delete_answers(question_id):
         """delete answer from db"""
-        cur.execute("DELETE FROM answers WHERE id=%s;" % answer_id)
+        cur.execute("DELETE FROM answers WHERE question_id='%s';" % question_id)
 
     @staticmethod
     def get_question_answers(question_id):
@@ -219,9 +220,9 @@ class Answer(object):
             return ans
 
     @staticmethod
-    def get_answer_from_body(body):
+    def get_answer_from_body(body, question_id):
         """get answer using answer using body"""
-        cur.execute("SELECT * FROM answers WHERE body = '%s';" % body)
+        cur.execute("SELECT * FROM answers WHERE body = '%s' AND question_id = '%s';" % (body, question_id))
         answer = cur.fetchone()
         if answer is None:
             return None
@@ -240,3 +241,12 @@ class Answer(object):
     def update_answer(self, body, preferred):
         cur.execute("UPDATE answers SET body='%s', preferred='%s' WHERE id='%s';" % (body, preferred, self.answer_id))
         conn.commit()
+
+    @staticmethod
+    def get_popular_question():
+        cur.execute("select question_id, COUNT(question_id) FROM answers GROUP BY question_id;")
+        answer = cur.fetchone()
+        if answer:
+            return answer[0]
+        else:
+            return None

@@ -26,7 +26,7 @@ def token_is_expired():
 
 @questions.app_errorhandler(404)
 def not_found(error):
-    return jsonify({'response': 'Not found'}), 404
+    return jsonify({'response': 'Nothing to see here'}), 404
 
 
 @questions.app_errorhandler(405)
@@ -88,7 +88,7 @@ def get_question(question_id):
             return jsonify({'response': 'Invalid token'}), 401
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:
         print('response', ex)
-        return jsonify({'response': 'could not get requests'}), 500
+        return jsonify({'response': 'something went wrong'}), 500
 
 
 @questions.route('/questions', methods=['POST'])
@@ -130,6 +130,9 @@ def add_question():
                     return jsonify({'response': 'question with same title already exists'}), 409
             else:
                 return jsonify({'response': 'could not generate user id from token'}), 401
+        except (KeyError, ValueError) as ex:
+            print('response', ex)
+            return jsonify({'response': 'invalid json'}), 400
         except (psycopg2.DatabaseError, psycopg2.IntegrityError, KeyError, Exception) as ex:
             print('response', ex)
             return jsonify({'response': 'something went wrong'}), 500
@@ -184,6 +187,9 @@ def add_answer(question_id):
                     return jsonify({"response": status}), 500
             else:
                 return jsonify({'response': 'could not generate user id from token'}), 401
+        except (KeyError, ValueError) as ex:
+            print('response', ex)
+            return jsonify({'response': 'invalid json'}), 400
         except (psycopg2.DatabaseError, psycopg2.IntegrityError, KeyError, Exception) as ex:
             print('response', ex)
             return jsonify({'response': 'something went wrong'}), 500
@@ -240,6 +246,9 @@ def update_answer(question_id, answer_id):
                     return jsonify({'response': 'answer updated successfully'}), 200
             else:
                 return jsonify({'response': 'could not generate user id from token'}), 401
+        except (KeyError, ValueError) as ex:
+            print('response', ex)
+            return jsonify({'response': 'Invalid json'}), 400
         except Exception as ex:
             print(ex)
             return jsonify({"response": "Something went wrong"}), 500
@@ -251,6 +260,7 @@ def delete_question(question_id):
     try:
         if token_is_expired() is None:
             if Question.delete_question(question_id):
+                Answer.delete_answers(question_id)
                 return jsonify({"response": "question deleted successfully"}), 200
             else:
                 return jsonify({"response": "question not found"}), 404
@@ -259,3 +269,19 @@ def delete_question(question_id):
     except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:
         print('response', ex)
         return jsonify({'response': 'something went wrong'}), 500
+
+
+@questions.route('/questions/popular', methods=['GET'])
+def get_popular_question():
+    if token_is_expired() is None:
+        try:
+            question_id = Answer.get_popular_question()
+            if question_id:
+                return jsonify({'question': Question.get_question(question_id).__dict__}), 200
+            else:
+                return jsonify({}), 204
+        except (psycopg2.DatabaseError, psycopg2.IntegrityError, Exception) as ex:
+            print('response', ex)
+            return jsonify({'response': 'something went wrong'}), 500
+    else:
+            return jsonify({'response': 'Invalid token'}), 401
