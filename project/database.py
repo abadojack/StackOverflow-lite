@@ -1,12 +1,7 @@
 import psycopg2
-from .config import Config
 
 try:
-    conn = psycopg2.connect("dbname=%s host=%s user=%s password=%s" % (Config.DATABASE_NAME,
-                                                                      Config.DATABASE_HOST,
-                                                                      Config.DATABASE_USER,
-                                                                      Config.DATABASE_PASSWORD))
-    # conn = psycopg2.connect("dbname=dtf1o3dihcmjh host=ec2-50-17-194-129.compute-1.amazonaws.com user=sclbsmrebwfsnt password=010cef844685c852fc51be3afe0e72d3220154a228f00bf1ec6a27cd03caa3a4")
+    conn = psycopg2.connect("dbname=stackoverflow1 host=localhost user=postgres password=''")
 except Exception as e:
     print("connect to database failed ", e)
 
@@ -24,11 +19,11 @@ def create_tables():
 
         # create table questions
         questions = "CREATE TABLE questions(id VARCHAR(256) PRIMARY KEY, title VARCHAR(256), body TEXT," \
-                    "uid VARCHAR(256), time_created TIMESTAMP, preferred_answer VARCHAR(256));"
+                    "user_id VARCHAR(256), time_created TIMESTAMP, preferred_answer VARCHAR(256));"
 
         # create table answers
         answers = "CREATE TABLE answers(id VARCHAR(256) PRIMARY KEY, body TEXT," \
-                  "uid VARCHAR(256), qid VARCHAR(256), preferred BOOLEAN DEFAULT FALSE, time_created TIMESTAMP);"
+                  "user_id VARCHAR(256), question_id VARCHAR(256), preferred BOOLEAN DEFAULT FALSE, time_created TIMESTAMP);"
 
         # create table tokens
         tokens = "CREATE TABLE tokens(id VARCHAR(256) PRIMARY KEY, expired_tokens VARCHAR(256));"

@@ -4,7 +4,9 @@
 
 StackOverflow-lite is a platform where people can ask questions and provide answers
 
+[Try it out on Heroku](https://boiling-savannah-49065.herokuapp.com/)
 
+[Documentation](https://stackoverflow3.docs.apiary.io/#)
 
 # Endpoints
 ## Sign up

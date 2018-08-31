@@ -18,7 +18,7 @@ class TestUsers(BaseTest):
                                  content_type='application/json')
         resp_data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(resp_data['response'], 'email must not be empty')
+        self.assertEqual(resp_data['response'], 'invalid email')
 
     def test_sign_up_invalid_email(self):
         res = self.client().post('api/v1/auth/signup', data=json.dumps(
@@ -26,14 +26,14 @@ class TestUsers(BaseTest):
                                  content_type='application/json')
         resp_data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(resp_data['response'], 'email not valid')
+        self.assertEqual(resp_data['response'], 'invalid email')
 
     def test_sign_up_no_email(self):
         res = self.client().post('api/v1/auth/signup', data=json.dumps(
             dict(username='test', password='password')),
                                  content_type='application/json')
         resp_data = json.loads(res.data.decode())
-        self.assertEqual(res.status_code, 500)
+        self.assertEqual(res.status_code, 400)
         self.assertEqual(resp_data['response'], 'json body must contain username, password and email')
 
     def test_sign_up_empty_username(self):
@@ -42,15 +42,15 @@ class TestUsers(BaseTest):
                                  content_type='application/json')
         resp_data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(resp_data['response'], 'username must not be empty')
+        self.assertEqual(resp_data['response'], 'invalid username')
 
-    def test_sign_up_empty_username(self):
+    def test_sign_up_empty_password(self):
         res = self.client().post('api/v1/auth/signup', data=json.dumps(
             dict(email='test@gmail.com', username='test', password='')),
                                  content_type='application/json')
         resp_data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(resp_data['response'], 'password must not be empty')
+        self.assertEqual(resp_data['response'], 'password must contain 6 or more characters')
 
     def test_login_success(self):
         # sign up new user
@@ -81,7 +81,7 @@ class TestUsers(BaseTest):
 
         token = json.loads(res_login.data.decode())["token"]
 
-        res = self.client().get('api/v1/auth/signout', content_type='application/json', headers=dict(token=token))
+        res = self.client().post('api/v1/auth/signout', content_type='application/json', headers=dict(token=token))
 
         resp_data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 200)
