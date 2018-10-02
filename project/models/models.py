@@ -31,17 +31,17 @@ class User(object):
         query = "INSERT INTO " \
                 "users (id, username,email,password_hash,time_created)" \
                 "VALUES('%s','%s', '%s', '%s', '%s')" % (
-                user_id, self.username, self.email, password_hash, self.time_created)
+                    user_id, self.username, self.email, password_hash, self.time_created)
         cur.execute(query)
         conn.commit()
 
-    def get_user(self, user_id):
+    @staticmethod
+    def get_user(user_id):
         """get user using user_id"""
-        cur.execute("SELECT * FROM users WHERE id = %s;" % user_id)
+        cur.execute("SELECT * FROM users WHERE id='%s';" % user_id)
         user = cur.fetchone()
         user_dict = {'id': user[0], 'username': user[1], 'email': user[2], 'password_hash': user[3],
                      'time_created': user[4]}
-        print(user_dict, "userdict")
         return user_dict
 
     def exists(self):
@@ -64,6 +64,7 @@ class Question(object):
         self.title = title
         self.body = body
         self.user_id = user_id
+        self.user = ''
         self.time_created = datetime.now()
         self.preferred_answer = ''
         self.answers = []
@@ -75,8 +76,9 @@ class Question(object):
         # question titles should not be the same
         if self.get_question_title(self.title) is None:
             query = "INSERT INTO questions (id, title, body, user_id, time_created, preferred_answer)" \
-                    "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (self.question_id, self.title, self.body, self.user_id,
-                                                                     self.time_created, self.preferred_answer)
+                    "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (
+                    self.question_id, self.title, self.body, self.user_id,
+                    self.time_created, self.preferred_answer)
             cur.execute(query)
             conn.commit()
             return True
@@ -95,12 +97,13 @@ class Question(object):
     @staticmethod
     def get_all_questions():
         """get all questions in db"""
-        cur.execute("SELECT * FROM questions;")
+        cur.execute("SELECT * FROM questions ORDER BY time_created DESC;")
         all_questions = cur.fetchall()
         questions_list = []
         for question in all_questions:
             answers = Answer.get_question_answers(question[0])
-            question_dict = {'question_id': question[0], 'title': question[1], 'body': question[2], 'user_id': question[3],
+            username = User.get_user(question[3])["username"]
+            question_dict = {'question_id': question[0], 'title': question[1], 'body': question[2], 'user': username,
                              'time_created': question[4], 'preferred_answer': question[5], "answers": answers}
             questions_list.append(question_dict)
         return questions_list
@@ -113,7 +116,8 @@ class Question(object):
         questions_list = []
         for question in all_questions:
             answers = Answer.get_question_answers(question[0])
-            question_dict = {'question_id': question[0], 'title': question[1], 'body': question[2], 'user_id': question[3],
+            username = User.get_user(question[3])["username"]
+            question_dict = {'question_id': question[0], 'title': question[1], 'body': question[2], 'user': username,
                              'time_created': question[4], 'preferred_answer': question[5], "answers": answers}
             questions_list.append(question_dict)
         return questions_list
@@ -130,6 +134,7 @@ class Question(object):
             quiz.time_created = question[4]
             quiz.preferred_answer = question[5]
             quiz.answers = answers
+            quiz.user = User.get_user(quiz.user_id)["username"]
             return quiz
         return None
 
@@ -169,8 +174,9 @@ class Answer(object):
             self.answer_id = uuid.uuid4()
             if self.get_answer_from_body(self.body, self.question_id) is None:
                 query = "INSERT INTO answers(id, body, user_id, question_id, preferred, time_created)" \
-                        "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (self.answer_id, self.body, self.user_id, self.question_id, self.preferred,
-                                                                         self.time_created)
+                        "VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (
+                        self.answer_id, self.body, self.user_id, self.question_id, self.preferred,
+                        self.time_created)
                 cur.execute(query)
                 conn.commit()
                 return 'success'
@@ -191,7 +197,9 @@ class Answer(object):
         answers = cur.fetchall()
         answers_list = []
         for answer in answers:
-            answer_dict = {'answer_id': answer[0], 'body': answer[1], 'user_id': answer[2], 'preferred': answer[4]}
+            username = User.get_user(answer[2])["username"]
+            answer_dict = {'answer_id': answer[0], 'body': answer[1], 'user': username, 'preferred': answer[4],
+                           'time_created': answer[5]}
             answers_list.append(answer_dict)
         return answers_list
 

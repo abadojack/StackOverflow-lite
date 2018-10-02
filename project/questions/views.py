@@ -80,6 +80,7 @@ def get_question(question_id):
     try:
         if token_is_expired() is None:
             question = Question.get_question(question_id)
+            print(question, "question")
             if question:
                 return jsonify({"question": question.__dict__}), 200
             else:

@@ -1,11 +1,11 @@
-
 import os
 from flask import Flask, redirect
+from flask_cors import CORS
 from project.questions.views import questions
 from project.users.views import users
 
 app = Flask(__name__)
-
+CORS(app)
 app.register_blueprint(questions, url_prefix='/api/v1')
 app.register_blueprint(users, url_prefix='/api/v1')
 
