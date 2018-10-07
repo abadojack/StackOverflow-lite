@@ -193,7 +193,7 @@ def add_answer(question_id):
             return jsonify({'response': 'invalid json'}), 400
         except (psycopg2.DatabaseError, psycopg2.IntegrityError, KeyError, Exception) as ex:
             print('response', ex)
-            return jsonify({'response': 'something went wrong'}), 500
+            return jsonify({'response': str(ex)}), 500
     return jsonify({'response': 'Invalid token'}), 401
 
 
